@@ -1,6 +1,6 @@
 # rust.ko
 
-a minimal kernel module written in rust.
+a minimal Linux kernel module written in rust.
 
 # TL;DR
 
