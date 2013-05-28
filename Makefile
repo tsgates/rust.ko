@@ -4,9 +4,9 @@ OBJ = hello
 obj-m = ${OBJ}.o
 hello-objs := stub.o main.o
 
-all: hello.ko
+all: ${OBJ}.ko
 
-hello.ko: stub.c main.o
+${OBJ}.ko: stub.c main.o
 	make -C /lib/modules/$(KER)/build M=$(PWD) modules
 	rust run fixup.rs $@
 
@@ -25,9 +25,9 @@ clean:
 	make -C /lib/modules/$(KER)/build M=$(PWD) clean
 	rm -f fixup~
 
-test:
+test: ${OBJ}.ko
 	sudo insmod ${OBJ}.ko
 	sudo rmmod ${OBJ}
-	dmesg | tail
+	dmesg | tail -3
 
 .PHONY: all clean insmod rmmod test
