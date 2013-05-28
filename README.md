@@ -15,5 +15,5 @@ a minimal kernel module written in rust.
     $ cat main.rs
     
 # refs
- - https://github.com/pcwalton/zero.rs.git
- - https://github.com/charliesome/rustboot.git
+ - [zero.rs](https://github.com/pcwalton/zero.rs.git)
+ - [rustboot](https://github.com/charliesome/rustboot.git)
