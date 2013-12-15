@@ -1,27 +1,17 @@
 #!/usr/bin/rust run
 
-use core::*;
-use core::int::*;
-use core::str::*;
+use std::str::{StrSlice, from_utf8};
+use std::from_str::from_str;
+use std::io;
+use std::path::Path;
+use std::os;
+use std::run;
+use std::to_str::ToStr;
+use std::num::from_str_radix;
 
 fn hex(s: &str) -> uint {
-    let digits = substr(s, 2, len(s) - 2);
-    return from_str_radix(digits, 16).get() as uint;
-}
-
-fn words(s: &str) -> ~[~str] {
-    let mut v: ~[~str] = ~[];
-    for str::each_word(s) |tok| { v.push(~"" + tok); }
-    return v;
-}
-
-fn read_bytes(pn: &str) -> ~[u8] {
-    let ok = io::file_reader(~path::Path(pn));
-    if !ok.is_ok() {
-        println("Failed to open");
-        os::set_exit_status(-1);
-    }
-    return ok.unwrap().read_whole_stream();
+    let digits = s.slice_from(2);
+    return from_str_radix(digits, 16).unwrap();
 }
 
 fn main() {
@@ -32,32 +22,31 @@ fn main() {
     }
     
     let file = ~"" + args[1];
-    let elf = run::program_output("readelf", [~"-r", ~"" + file]);
+    let elf = run::process_output("readelf", [~"-r", ~"" + file]);
 
     let mut ent = 0u;
     let mut off = 0u;
-    for str::each_line(elf.out) |line| {
-        if str::starts_with(line, "Relocation section '.rela.text'") {
-            off = hex(words(line)[5]);
-            ent = from_str(words(line)[7]).get() as uint;
+    let out_str = from_utf8(elf.output);
+    for line in out_str.lines() {
+        if line.starts_with("Relocation section '.rela.text'") {
+            let x1 : ~[&str] = line.words().collect();
+            off = hex(x1[5]);
+            ent = from_str::<uint>(x1[7]).unwrap();
             break;
         }
     }
-
-    let mut buf = read_bytes(file);
+    let mut buf = io::File::open(&Path::new(file.clone())).read_to_end();
     let mut i = 0u;
     while i < ent {
         let rel = off + 24*i + 8;
         if buf[rel] == 0x4 {
-            println(fmt!("Fixup: 0x%x", rel));
+            // TODO HEX!
+            println(format!("Fixup: 0x{}", rel));
             buf[rel] = 0x2;
         }
         i += 1;
     }
 
-    let ok = io::file_writer(~path::Path(file), [io::NoFlag]);
-    if ok.is_ok() {
-        let fd = ok.unwrap();
-        fd.write(buf);
-    }
+    let mut file = io::File::create(&Path::new(file));
+    file.write(buf);
 }
