@@ -1,13 +1,11 @@
 #[allow(ctypes)];
 #[no_std];
-#[no_core];
 
 extern "rust-intrinsic" {
     pub fn transmute<T,U>(val: T) -> U;
 }
 
 extern {
-    #[fast_ffi]
     pub fn printk(fmt: *u8);
 }
 
