@@ -3,6 +3,12 @@
 a minimal Linux kernel module written in rust.
 
 # TL;DR
+To compile you'll need a recent build of Rust (0.9-pre). 
+
+Create a file `config.mk` in the root directory of the repository.
+
+Set `RUST_ROOT` in this file to the directory containing `bin/rustc`, e.g.
+`RUST_ROOT := /usr`. Then you can compile rust.ko:
 
     $ make
     # insmod hello.ko
@@ -15,5 +21,4 @@ a minimal Linux kernel module written in rust.
     $ cat main.rs
     
 # refs
- - [zero.rs](https://github.com/pcwalton/zero.rs.git)
  - [rustboot](https://github.com/charliesome/rustboot.git)

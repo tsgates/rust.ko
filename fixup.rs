@@ -6,7 +6,6 @@ use std::io;
 use std::path::Path;
 use std::os;
 use std::run;
-use std::to_str::ToStr;
 use std::num::from_str_radix;
 
 fn hex(s: &str) -> uint {
@@ -40,7 +39,6 @@ fn main() {
     while i < ent {
         let rel = off + 24*i + 8;
         if buf[rel] == 0x4 {
-            // TODO HEX!
             println(format!("Fixup: 0x{}", rel));
             buf[rel] = 0x2;
         }
