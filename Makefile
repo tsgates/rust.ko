@@ -1,3 +1,10 @@
+RUST_ROOT :=
+
+-include ./config.mk
+
+RC := $(RUST_ROOT)/bin/rustc
+
+
 KER = $(shell uname -r)
 OBJ = hello
 
@@ -6,12 +13,15 @@ hello-objs := stub.o main.o
 
 all: ${OBJ}.ko
 
-${OBJ}.ko: stub.c main.o
+${OBJ}.ko: stub.c main.o fixup
 	make -C /lib/modules/$(KER)/build M=$(PWD) modules
-	rust run fixup.rs $@
+	./fixup $@
+
+fixup: fixup.rs
+	$(RC) fixup.rs
 
 %.o: %.rs
-	rustc -O --lib -o $@ -c $<
+	$(RC) -O --lib -o $@ -c $<
 
 insmod:
 	sudo insmod ${OBJ}.ko
