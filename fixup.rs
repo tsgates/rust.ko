@@ -16,16 +16,16 @@ fn hex(s: &str) -> uint {
 fn main() {
     let args = os::args();
     if args.len() != 2 {
-        println("[usage] fixup [ko]");
+        println!("[usage] fixup [ko]");
         return;
     }
     
     let file = ~"" + args[1];
-    let elf = run::process_output("readelf", [~"-r", ~"" + file]);
+    let elf = run::process_output("readelf", [~"-r", ~"" + file]).unwrap();
 
     let mut ent = 0u;
     let mut off = 0u;
-    let out_str = from_utf8(elf.output);
+    let out_str = from_utf8(elf.output).unwrap();
     for line in out_str.lines() {
         if line.starts_with("Relocation section '.rela.text'") {
             let x1 : ~[&str] = line.words().collect();
@@ -39,7 +39,7 @@ fn main() {
     while i < ent {
         let rel = off + 24*i + 8;
         if buf[rel] == 0x4 {
-            println(format!("Fixup: 0x{}", rel));
+            println!("Fixup: 0x{}", rel);
             buf[rel] = 0x2;
         }
         i += 1;
