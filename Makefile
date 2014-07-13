@@ -1,4 +1,4 @@
-RUST_ROOT :=
+RUST_ROOT := ../rust-nightly
 
 -include ./config.mk
 
@@ -15,13 +15,14 @@ all: ${OBJ}.ko
 
 ${OBJ}.ko: stub.c main.o fixup
 	make -C /lib/modules/$(KER)/build M=$(PWD) modules
-	./fixup $@
+
+#	./fixup $@
 
 fixup: fixup.rs
 	$(RC) fixup.rs
 
 %.o: %.rs
-	$(RC) -O --lib -o $@ -c $<
+	$(RC) -O --crate-type lib -o $@ --emit obj $<
 
 insmod:
 	sudo insmod ${OBJ}.ko
