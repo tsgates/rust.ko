@@ -20,7 +20,7 @@ fn main() {
         return;
     }
     
-    let file = args.get(1).to_string();
+    let file = args[1].to_string();
     let elf_out = Command::new("readelf").arg("-r").arg(file.clone()).output();
 
     let mut ent = 0u;
@@ -34,8 +34,8 @@ fn main() {
         if line.starts_with("Relocation section '.rela.text.rust_main'") {
             let x1 : Vec<&str> = line.words().collect();
             println!("{}", x1);
-            off = hex(*x1.get(5));
-            ent = from_str::<uint>(*x1.get(7)).unwrap();
+            off = hex(x1[5]);
+            ent = from_str::<uint>(x1[7]).unwrap();
             break;
         }
     }
@@ -44,7 +44,7 @@ fn main() {
       fail!("failed to open output file: {}", result.err());
     }
     let mut buf_vec = result.ok().unwrap();
-    let mut buf = buf_vec.as_mut_slice();
+    let buf = buf_vec.as_mut_slice();
     let mut i = 0u;
     while i < ent {
         let rel = off + 24*i + 8;
