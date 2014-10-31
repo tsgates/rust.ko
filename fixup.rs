@@ -1,16 +1,42 @@
 #!/usr/bin/rust run
 
-use std::str::{StrSlice, from_utf8};
-use std::from_str::from_str;
-use std::io;
+use std::str::{from_utf8};
 use std::path::Path;
 use std::os;
 use std::io::Command;
+use std::io::File;
 use std::num::from_str_radix;
 
-fn hex(s: &str) -> uint {
-    let digits = s.slice_from(2);
-    return from_str_radix(digits, 16).unwrap();
+// argument: name of a .ko-file containing 'rust_main'
+// result:   relocation section attributes (entries, offset)
+fn readelf(file: &Path) -> (uint, uint) {
+    let parse = |s: &str| {
+        for line in s.lines() {
+            if line.starts_with("Relocation section '.rela.text.rust_main'") {
+                let x1 : Vec<&str> = line.words().collect();
+                println!("{}", x1);
+                let ent: uint = from_str_radix(x1[7], 10).unwrap();
+                let off: uint = from_str_radix(x1[5].slice_from(2), 16).unwrap();
+                return (ent, off);
+            }
+        }
+        return (0, 0);
+    };
+    let filename = file.as_str().unwrap();
+    match Command::new("readelf").arg("-r").arg(filename).output() {
+        Err(e)   => fail!("failed to execute readelf: {}", e),
+        Ok (out) => from_utf8(out.output.as_slice()).map(parse).unwrap()
+    }
+}
+
+fn patch(ent: uint, off: uint, buf: &mut [u8]) {
+    for i in range (0, ent) {
+        let rel = off + 24*i + 8;
+        if buf[rel] == 0x4 {
+            println!("Fixup: 0x{}", rel);
+            buf[rel] = 0x2;
+        }
+    }
 }
 
 fn main() {
@@ -19,42 +45,16 @@ fn main() {
         println!("[usage] fixup [ko]");
         return;
     }
-    
-    let file = args[1].to_string();
-    let elf_out = Command::new("readelf").arg("-r").arg(file.clone()).output();
+    let filepath = &Path::new(args[1].as_slice());
 
-    let mut ent = 0u;
-    let mut off = 0u;
-    if elf_out.is_err() {
-      fail!("failed to execute readelf: {}", elf_out.err());
-    }
-    let out = elf_out.ok().unwrap().output;
-    let out_str = from_utf8(out.as_slice()).unwrap();
-    for line in out_str.lines() {
-        if line.starts_with("Relocation section '.rela.text.rust_main'") {
-            let x1 : Vec<&str> = line.words().collect();
-            println!("{}", x1);
-            off = hex(x1[5]);
-            ent = from_str::<uint>(x1[7]).unwrap();
-            break;
-        }
-    }
-    let result = io::File::open(&Path::new(file.clone())).read_to_end();
-    if result.is_err() {
-      fail!("failed to open output file: {}", result.err());
-    }
-    let mut buf_vec = result.ok().unwrap();
-    let buf = buf_vec.as_mut_slice();
-    let mut i = 0u;
-    while i < ent {
-        let rel = off + 24*i + 8;
-        if buf[rel] == 0x4 {
-            println!("Fixup: 0x{}", rel);
-            buf[rel] = 0x2;
-        }
-        i += 1;
-    }
+    let mut buf = match File::open(filepath).read_to_end() {
+        Err(e)   => fail!("failed to open output file: {}", e),
+        Ok (res) => res
+    };
 
-    let mut file = io::File::create(&Path::new(file));
-    file.write(buf.as_slice());
+    let (ent, off) = readelf(filepath);
+    patch(ent, off, buf.as_mut_slice());
+
+    let mut file = File::create(filepath);
+    file.write(buf.as_slice()).unwrap();
 }
