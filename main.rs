@@ -1,4 +1,4 @@
-#![allow(ctypes)]
+#![allow(improper_ctypes)]
 #![no_std]
 #![feature(intrinsics)]
 #![feature(lang_items)]
