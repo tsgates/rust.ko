@@ -24,7 +24,7 @@ fn readelf(file: &Path) -> (uint, uint) {
     };
     let filename = file.as_str().unwrap();
     match Command::new("readelf").arg("-r").arg(filename).output() {
-        Err(e)   => fail!("failed to execute readelf: {}", e),
+        Err(e)   => panic!("failed to execute readelf: {}", e),
         Ok (out) => from_utf8(out.output.as_slice()).map(parse).unwrap()
     }
 }
@@ -48,7 +48,7 @@ fn main() {
     let filepath = &Path::new(args[1].as_slice());
 
     let mut buf = match File::open(filepath).read_to_end() {
-        Err(e)   => fail!("failed to open output file: {}", e),
+        Err(e)   => panic!("failed to open output file: {}", e),
         Ok (res) => res
     };
 
