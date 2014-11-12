@@ -3,7 +3,7 @@
 a minimal Linux kernel module written in rust.
 
 # TL;DR
-To compile you'll need a recent build of Rust (0.9-pre). 
+To compile you'll need a recent build of Rust (0.13-dev).
 
 Create a file `config.mk` in the root directory of the repository.
 
