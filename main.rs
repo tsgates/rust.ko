@@ -1,6 +1,4 @@
-#![allow(improper_ctypes)]
 #![no_std]
-#![feature(intrinsics)]
 
 extern crate core;
 
