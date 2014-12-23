@@ -8,23 +8,24 @@ use std::num::from_str_radix;
 // argument: name of a .ko-file containing 'rust_main'
 // result:   relocation section attributes (entries, offset)
 fn readelf(file: &Path) -> (uint, uint) {
-    let parse = |s: &str| {
-        for line in s.lines() {
-            if line.starts_with("Relocation section '.rela.text.rust_main'") {
-                let x1 : Vec<&str> = line.words().collect();
-                println!("{}", x1);
-                let ent: uint = from_str_radix(x1[7], 10).unwrap();
-                let off: uint = from_str_radix(x1[5].slice_from(2), 16).unwrap();
-                return (ent, off);
-            }
-        }
-        return (0, 0);
-    };
     let filename = file.as_str().unwrap();
     match Command::new("readelf").arg("-r").arg(filename).output() {
         Err(e)   => panic!("failed to execute readelf: {}", e),
         Ok (out) => from_utf8(out.output.as_slice()).map(parse).unwrap()
     }
+}
+
+fn parse(s: &str) -> (uint, uint) {
+    for line in s.lines() {
+        if line.starts_with("Relocation section '.rela.text.rust_main'") {
+            let x1 : Vec<&str> = line.words().collect();
+            println!("{}", x1);
+            let ent: uint = from_str_radix(x1[7], 10).unwrap();
+            let off: uint = from_str_radix(x1[5].slice_from(2), 16).unwrap();
+            return (ent, off);
+        }
+    }
+    return (0, 0);
 }
 
 fn patch(ent: uint, off: uint, buf: &mut [u8]) {
