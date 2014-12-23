@@ -7,13 +7,14 @@ RC := $(RUST_ROOT)/bin/rustc
 
 KER = $(shell uname -r)
 OBJ = hello
+RMODS = macros.rs raw.rs
 
 obj-m = ${OBJ}.o
 hello-objs := stub.o main.o
 
 all: ${OBJ}.ko
 
-${OBJ}.ko: stub.c main.o fixup
+${OBJ}.ko: stub.c main.o ${RMODS} fixup
 	make -C /lib/modules/$(KER)/build M=$(PWD) modules
 	./fixup $@
 
