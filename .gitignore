@@ -1,7 +1,9 @@
 /*.cmd
 /*.ko
+/*.o
 /*.mod.*
 /*.order
+/fixup
 /Module.symvers
 /.tmp_versions
 config.mk
