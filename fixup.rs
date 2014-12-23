@@ -1,5 +1,3 @@
-#!/usr/bin/rust run
-
 use std::str::{from_utf8};
 use std::path::Path;
 use std::os;
