@@ -4,9 +4,7 @@
 
 extern crate core;
 
-extern "rust-intrinsic" {
-    pub fn transmute<T,U>(val: T) -> U;
-}
+use core::mem::transmute;
 
 extern {
     pub fn printk(fmt: *mut u8);
