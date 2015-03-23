@@ -1,17 +1,28 @@
-use std::str::{from_utf8};
-use std::path::Path;
+extern crate core;
+
+use core::fmt::Display;
+use std::fs::File;
 use std::os;
-use std::io::Command;
-use std::io::File;
+use std::path::Path;
+use std::process::Command;
+use std::io::Read;
+use std::io::Write;
 use std::num::from_str_radix;
+use std::str::{from_utf8};
 
 // argument: name of a .ko-file containing 'rust_main'
 // result:   relocation section attributes (entries, offset)
 fn readelf(file: &Path) -> (uint, uint) {
-    let filename = file.as_str().unwrap();
+    let filename = file.to_str().unwrap();
     match Command::new("readelf").arg("-r").arg(filename).output() {
         Err(e)   => panic!("failed to execute readelf: {}", e),
-        Ok (out) => from_utf8(out.output.as_slice()).map(parse).unwrap()
+        Ok (out) => from_utf8(out.stdout.as_slice()).map(parse).unwrap()
+    }
+}
+
+fn print_vec<T: Display>(v: &[T]) {
+    for i in v.iter() {
+        println!("{}", i)
     }
 }
 
@@ -19,7 +30,7 @@ fn parse(s: &str) -> (uint, uint) {
     for line in s.lines() {
         if line.starts_with("Relocation section '.rela.text.rust_main'") {
             let x1 : Vec<&str> = line.words().collect();
-            println!("{}", x1);
+            print_vec(x1.as_slice());
             let ent: uint = from_str_radix(x1[7], 10).unwrap();
             let off: uint = from_str_radix(x1[5].slice_from(2), 16).unwrap();
             return (ent, off);
@@ -46,14 +57,14 @@ fn main() {
     }
     let filepath = &Path::new(args[1].as_slice());
 
-    let mut buf = match File::open(filepath).read_to_end() {
-        Err(e)   => panic!("failed to open output file: {}", e),
-        Ok (res) => res
-    };
+    let mut buf: Vec<u8> = Vec::new();
+    if File::open(filepath).unwrap().read_to_end(&mut buf).is_err() {
+        panic!("failed to open or read file: {}", filepath.to_str().unwrap());
+    }
 
     let (ent, off) = readelf(filepath);
     patch(ent, off, buf.as_mut_slice());
 
-    let mut file = File::create(filepath);
+    let mut file = File::create(filepath).unwrap();
     file.write(buf.as_slice()).unwrap();
 }

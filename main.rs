@@ -1,5 +1,6 @@
-#![no_std]
+#![feature(no_std)]
 #![feature(macro_rules)]
+#![no_std]
 
 extern crate core;
 extern crate libc;
