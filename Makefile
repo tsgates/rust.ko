@@ -3,6 +3,7 @@ RUST_ROOT :=
 -include ./config.mk
 
 RC := $(RUST_ROOT)/bin/rustc
+RCFLAGS := -O -C code-model=kernel -C relocation-model=static
 
 
 KER = $(shell uname -r)
@@ -14,15 +15,11 @@ hello-objs := stub.o main.o
 
 all: ${OBJ}.ko
 
-${OBJ}.ko: stub.c main.o ${RMODS} fixup
+${OBJ}.ko: stub.c main.o ${RMODS}
 	make -C /lib/modules/$(KER)/build M=$(PWD) modules
-	./fixup $@
-
-fixup: fixup.rs
-	$(RC) fixup.rs
 
 %.o: %.rs
-	$(RC) -O --crate-type lib -o $@ --emit obj $<
+	$(RC) $(RCFLAGS) --crate-type lib -o $@ --emit obj $<
 
 insmod:
 	sudo insmod ${OBJ}.ko
@@ -34,7 +31,6 @@ rmmod:
 
 clean:
 	make -C /lib/modules/$(KER)/build M=$(PWD) clean
-	rm -f fixup~
 
 test: ${OBJ}.ko
 	sudo insmod ${OBJ}.ko
