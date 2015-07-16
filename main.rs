@@ -1,9 +1,14 @@
+#![feature(core)]
+#![feature(core_str_ext)]
+#![feature(libc)]
+#![feature(no_std)]
+
 #![no_std]
-#![feature(macro_rules)]
 
 extern crate core;
 extern crate libc;
 
+#[macro_use]
 mod macros;
 mod raw;
 

@@ -1,14 +1,13 @@
-#![macro_escape]
-
 macro_rules! cstr {
     ($arg:expr) => (concat!($arg, "\0"))
 }
 
 macro_rules! print {
-    ($str:expr) => (unsafe {
+    ($str:expr) => ({
+        use core::str::StrExt;
         let str = cstr!($str);
-        let (ptr, _): (*const libc::c_char, uint) = core::mem::transmute(str);
-        raw::printk(ptr);
+        let ptr = str.as_ptr() as *const libc::c_char;
+        unsafe { raw::printk(ptr); }
     })
 }
 
