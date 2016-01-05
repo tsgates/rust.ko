@@ -1,4 +1,8 @@
-RUST_ROOT :=
+ifdef RUST_ROOT
+	RUST_ROOT := $(RUST_ROOT)
+else
+	RUST_ROOT := /usr
+endif
 
 -include ./config.mk
 
