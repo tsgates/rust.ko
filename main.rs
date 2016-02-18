@@ -1,11 +1,8 @@
-#![feature(core)]
 #![feature(core_str_ext)]
 #![feature(libc)]
-#![feature(no_std)]
 
 #![no_std]
 
-extern crate core;
 extern crate libc;
 
 #[macro_use]
