@@ -1,9 +1,5 @@
-/*.cmd
-/*.ko
-/*.o
-/*.mod.*
-/*.order
-/fixup
-/Module.symvers
-/.tmp_versions
+/build
+/target
+/+junk
 config.mk
+*.ko

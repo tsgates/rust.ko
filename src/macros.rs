@@ -6,7 +6,7 @@ macro_rules! print {
     ($str:expr) => ({
         use core::str::StrExt;
         let str = cstr!($str);
-        let ptr = str.as_ptr() as *const libc::c_char;
+        let ptr = str.as_ptr() as *const types::c_char;
         unsafe { raw::printk(ptr); }
     })
 }
