@@ -6,7 +6,7 @@
 # project.
 
 # Name of object file to create by Rust
-rust-target := ${KERNEL_MODULE}-rust.o
+rust-target := lib${KERNEL_MODULE}.a
 
 # Tell kbuild which files to build
 obj-m                 := ${KERNEL_MODULE}.o
@@ -24,4 +24,5 @@ RUST_FILES := $(foreach filepath,${RUST_FILES},${BASE_DIR}/$(filepath))
 #       target file (such as "x86_64-unknown-none-gnu.json") was created for the architecture of the
 #       kernel you're trying to compile this module for.
 $(obj)/${rust-target}: ${RUST_FILES}
-	cd "${BASE_DIR}" && $(CARGO) rustc ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS} --emit obj -o "$(obj)/${rust-target}"
+	cd "${BASE_DIR}" && $(CARGO) build --verbose ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS}
+	cp "${BASE_DIR}"/target/x86_64-unknown-none-gnu/debug/${rust-target} $(obj)
