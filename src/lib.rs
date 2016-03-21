@@ -2,8 +2,6 @@
 #![feature(custom_attribute, lang_items)]
 #![no_std]
 
-use core::fmt;
-
 #[macro_use]
 mod macros;
 
