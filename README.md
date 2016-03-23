@@ -4,7 +4,7 @@ a minimal Linux kernel module written in rust.
 
 ## Requirements
 
- - A recent build of Rust (1.8-nightly)
+ - A recent build of Rust (latest nightly)
 
 This code uses [feature flags](http://blog.rust-lang.org/2014/10/30/Stability.html#the-plan), so
 you'll need to use a [nightly version of Rust](http://doc.rust-lang.org/book/nightly-rust.html)
