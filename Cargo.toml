@@ -3,7 +3,6 @@ name    = "hello"
 version = "0.1.0"
 
 [lib]
-name = "hello"
 crate-type = ["staticlib"]
 
 [dependencies.core]

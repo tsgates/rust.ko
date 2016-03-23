@@ -1,8 +1,12 @@
+use core;
 
+#[lang = "eh_personality"]
+extern fn eh_personality() {}
 
-#[lang = "stack_exhausted"] extern fn stack_exhausted() {}
-#[lang = "eh_personality"] extern fn eh_personality() {}
-#[lang = "panic_fmt"] extern fn panic_fmt() -> ! {loop{}}
-#[no_mangle]
-#[allow(non_snake_case)]
-pub fn _Unwind_Resume(_ix_obj: *mut ()) {}
+#[lang = "eh_unwind_resume"]
+extern fn eh_unwind_resume() {}
+
+#[lang = "panic_fmt"]
+extern fn panic_impl(_: core::fmt::Arguments, _: &'static str, _: u32) -> ! {
+	loop{}
+}
