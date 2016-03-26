@@ -1,0 +1,14 @@
+[package]
+name    = "linux-std"
+version = "0.1.0"
+
+# Generate bindings for kernel functions
+build = "build.rs"
+
+[dependencies.core]
+git = "https://github.com/phil-opp/nightly-libcore.git"
+features = ["disable_float"]
+
+[build-dependencies]
+bindgen = {git = "https://github.com/alexander255/rust-bindgen.git"}
+shlex   = "0.1.*"

@@ -36,6 +36,6 @@ endif
 # Note: UTS_MACHINE is the architecture of the target kernel, Rust compilation will  fail  unless  a
 #       target file (such as "x86_64-unknown-none-gnu.json") was created for the architecture of the
 #       kernel you're trying to compile this module for.
-$(obj)/${rust-target}: ${RUST_FILES}
-	cd "${BASE_DIR}" && $(CARGO) build --verbose ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS}
+$(obj)/${rust-target}: ${RUST_FILES} FORCE
+	cd "${BASE_DIR}" && env STD_CLANG_ARGS='${c_flags}' STD_KERNEL_PATH='${CURDIR}' STD_CLANG_FILES='${KERNEL_INCLUDE}' "${CARGO}" rustc $(if ${RELEASE},--release) $(if ${V},--verbose) ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS}
 	cp "${CARGO_OUT_DIR}/${rust-target}" $(obj)

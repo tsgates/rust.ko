@@ -8,3 +8,6 @@ crate-type = ["staticlib"]
 [dependencies.core]
 git = "https://github.com/phil-opp/nightly-libcore.git"
 features = ["disable_float"]
+
+[dependencies.linux-std]
+path = "std"
