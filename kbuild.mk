@@ -12,6 +12,11 @@ rust-target := lib${KERNEL_MODULE}.a
 obj-m                 := ${KERNEL_MODULE}.o
 ${KERNEL_MODULE}-objs := $(patsubst %.c,%.o,${C_FILES}) ${rust-target}
 
+# Strip unused symbols from the input object file
+EXTRA_LDFLAGS += --gc-sections --entry=init_module --require-defined=cleanup_module
+EXTRA_LDFLAGS += $(if ${RELEASE},--strip-all)
+
+
 # Tell kbuild where the source files are
 src := ${BASE_DIR}
 
@@ -19,12 +24,12 @@ src := ${BASE_DIR}
 C_FILES    := $(foreach filepath,${C_FILES}   ,${BASE_DIR}/$(filepath))
 RUST_FILES := $(foreach filepath,${RUST_FILES},${BASE_DIR}/$(filepath))
 
+# Determine target directory of cargo build
 CARGO_OUT_DIR := ${BASE_DIR}/target/${UTS_MACHINE}-unknown-none-gnu
-
 ifeq (${RELEASE},1)
-	CARGO_OUT_DIR :=${CARGO_OUT_DIR}/release
+	CARGO_OUT_DIR := ${CARGO_OUT_DIR}/release
 else
-	CARGO_OUT_DIR :=${CARGO_OUT_DIR}/debug
+	CARGO_OUT_DIR := ${CARGO_OUT_DIR}/debug
 endif
 
 # Build rule for Rust target object

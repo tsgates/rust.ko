@@ -19,12 +19,7 @@ export RELEASE    =
 
 -include ./config.mk
 
-ifeq (${RELEASE},1)
-	CARGOFLAGS += --release
-	STRIP := strip --strip-debug
-else
-	STRIP := @true
-endif
+
 # Top-level project directory
 export BASE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
@@ -32,7 +27,6 @@ export BASE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))
 all modules: ${BUILD_DIRECTORY}/Makefile
 	@$(MAKE) -C "${KERNEL_BUILD_PATH}" M="${BASE_DIR}/${BUILD_DIRECTORY}" modules
 	cp "${BUILD_DIRECTORY}/${KERNEL_MODULE}.ko" "${KERNEL_MODULE}.ko"
-	$(STRIP) "${KERNEL_MODULE}.ko"
 
 # Make sure there always is a target `Makefile` for kbuild in place
 ${BUILD_DIRECTORY}/Makefile: kbuild.mk
