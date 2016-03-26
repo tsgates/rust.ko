@@ -1,4 +1,3 @@
-use std::io::Read;
 use std::io::Write;
 
 extern crate bindgen;
@@ -7,10 +6,6 @@ extern crate shlex;
 
 /// Path to the kernel bindings source file to generate
 const FILEPATH_CODE:   &'static str = "src/os/kernel.rs";
-
-/// Name of the file to store information, about whether to build needs to be
-/// re-done or not, in (relative to `cargo`'s BUILD_DIR)
-const FILENAME_CONFIG: &'static str = "kernel.rs.config";
 
 /// Name of the file to store include directives for the C preprocessor in
 const FILENAME_HEADER: &'static str = "kernel-include.h";
@@ -98,31 +93,7 @@ fn main() {
 	
 	
 	
-	let filepath_config = format!("{}/{}", out_dir, FILENAME_CONFIG);
 	let filepath_header = format!("{}/{}", out_dir, FILENAME_HEADER);
-	
-	// Don't recompile needlessly
-	match std::fs::File::open(filepath_config.clone()) {
-		Ok(mut file) => {
-			let mut contents = String::new();
-			
-			let final_clang_args  = clang_args.join(" ");
-			let final_clang_files = clang_files.join(" ");
-			if let Ok(_) = file.read_to_string(&mut contents) {
-				let mut lines = contents.split('\n');
-				
-				if lines.next() == Some(final_clang_args.as_str())
-				&& lines.next() == Some(final_clang_files.as_str())
-				&& lines.next() == Some(kernel_path.as_str()) {
-					// Binding file was already built for this kernel with these parameters
-					return;
-				}
-			}
-		},
-		_ => ()
-	};
-	
-	
 	
 	// Assemble parsing options
 	let mut options = bindgen::BindgenOptions {
@@ -191,18 +162,5 @@ fn main() {
 		}
 		
 		assert!(std::env::set_current_dir(&build_path).is_ok());
-	};
-	
-	
-	// Build succeeded – remember build parameters to speed up next build
-	match std::fs::File::create(filepath_config.clone()) {
-		Ok(mut file) => {
-			writeln!(file, "{}", clang_args.join(" ")).unwrap();
-			writeln!(file, "{}", clang_files.join(" ")).unwrap();
-			writeln!(file, "{}", kernel_path).unwrap();
-		},
-		Err(error) => {
-			panic!("Failed to open file \"{}\": {}", filepath_config, error);
-		}
 	};
 }
