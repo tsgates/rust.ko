@@ -27,6 +27,16 @@ to compile it.
           [54024.187000] hello from rust
           [54024.191963] hello: exit
 
+## `make` command-line options
+
+Currently there are a few parameters you can pass to `make` to affect the build:
+
+ * `V=1`: Enable verbose output
+   - All commands run by `make` and `cargo` will be printed to the screen
+ * `RELEASE=1`: Create a release build
+   - `rustc` will compile all code in `--release` mode
+   - Debugging information will not be added to the final binary
+
 # Notes
 
 ## Cargo.lock
@@ -37,14 +47,6 @@ your project. Since this is an example project it will not ship any `Cargo.lock`
 recommended that you commit it to your source tree if you're actually trying to build a project
 based on this code.<br />
 (Please don't make any pull requests to this code containing a `Cargo.lock` file through.)
-
-## File size
-
-If you look at the file size of your `hello.ko` file, you'll notice that it's pretty big (~100kB)
-for a dummy module that simply prints 3 lines to the kernel ring buffer (*dmesg*). This is mostly
-because the default build settings produce a debugging build that contains a lot of redundant
-debugging information. If you're concerned about the file size, try doing a release build, using
-`make RELEASE=1`, instead and you'll find the file size to be a lot more reasonable (~5kB).
 
 ## Build targets
 
