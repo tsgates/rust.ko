@@ -2,6 +2,8 @@
 export KERNEL_BUILD_PATH := /lib/modules/$(shell uname -r)/build
 # Name of this kernel module
 export KERNEL_MODULE     := hello
+# List of kernel headers to include (e.g.: "linux/netdevice.h")
+export KERNEL_INCLUDE    := 
 # Path to the directory where kernel build artifacts should be stored
 export BUILD_DIRECTORY   := build
 # List of C files to compile into this kernel module
@@ -19,20 +21,20 @@ export RELEASE    =
 
 -include ./config.mk
 
-ifeq (${RELEASE},1)
-	CARGOFLAGS += --release
-	STRIP := strip --strip-debug
-else
-	STRIP := @true
-endif
+
 # Top-level project directory
 export BASE_DIR := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
+
+
+# Prevent command echoing, unless the (Kbuild-style) `V=1` parameter is set
+ifneq "$(V)" "1"
+.SILENT:
+endif
 
 
 all modules: ${BUILD_DIRECTORY}/Makefile
 	@$(MAKE) -C "${KERNEL_BUILD_PATH}" M="${BASE_DIR}/${BUILD_DIRECTORY}" modules
 	cp "${BUILD_DIRECTORY}/${KERNEL_MODULE}.ko" "${KERNEL_MODULE}.ko"
-	$(STRIP) "${KERNEL_MODULE}.ko"
 
 # Make sure there always is a target `Makefile` for kbuild in place
 ${BUILD_DIRECTORY}/Makefile: kbuild.mk

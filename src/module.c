@@ -12,16 +12,6 @@ void abort(void)
     BUG();
 }
 
-void *malloc(size_t s)
-{
-    return kmalloc(s, GFP_KERNEL);
-}
-
-void free(void *ptr)
-{
-    kfree(ptr);
-}
-
 extern void rust_main(void);
 
 static int hello_init(void)
