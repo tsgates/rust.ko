@@ -19,7 +19,7 @@ obj-m                 := ${KERNEL_MODULE}.o
 ${KERNEL_MODULE}-objs := $(patsubst %.c,%.o,${C_FILES}) ${rust-target}
 
 # Strip unused symbols from the input object file
-EXTRA_LDFLAGS += --gc-sections --entry=init_module --require-defined=cleanup_module
+EXTRA_LDFLAGS += --gc-sections --entry=init_module --undefined=cleanup_module
 EXTRA_LDFLAGS += $(if ${RELEASE},--strip-all)
 
 
