@@ -59,7 +59,7 @@ generate CPU code that is in line with what the kernel expects. This means speci
  * No target operating system (after all: When you are in kernel mode, *you* are the operating system)
 
 Currently this source code only ships with a target specification file for the
-[x64_64](x86_64-unknown-none-gnu.json) architecture. If you get an error similar to the following,
+[x86_64](x86_64-unknown-none-gnu.json) architecture. If you get an error similar to the following,
 you'll have the honor of creating and submitting one for favourite architecture: :wink:
 
 	cd "…/rust.ko" && /usr/local/bin/cargo rustc --target="armhf-unknown-none-gnu" --  --emit obj -o "…/rust.ko/build/hello-rust.o"
