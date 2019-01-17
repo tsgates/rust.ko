@@ -132,5 +132,8 @@ fn main() {
         .write(Box::new(output))
         .unwrap();
 
+    // Don't re-run this thing, ever. It takes too long. Do a clean rebuild if the kernel changes.
+    println!("cargo:rerun-if-changed=build.rs");
+
     env::set_current_dir(&build_path).unwrap();
 }

@@ -1,4 +1,4 @@
-#![feature(custom_attribute, lang_items)]
+#![feature(custom_attribute, lang_items, panic_info_message)]
 #![no_std]
 
 #[macro_use]
