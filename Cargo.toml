@@ -7,3 +7,6 @@ crate-type = ["staticlib"]
 
 [dependencies.linux-std]
 path = "std"
+
+[workspace]
+members = [ ".", "std" ]
