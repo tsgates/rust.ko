@@ -43,7 +43,7 @@ CARGO_BLD_DIR := ${BASE_DIR}/target/$(if ${RELEASE},release,debug)
 $(obj)/${rust-target}: ${RUST_FILES} FORCE
 	test '${std-config}' = "`cat "$(obj)/${std-config-target}" 2>/dev/null`" || rm -rf "${CARGO_BLD_DIR}/build/linux-std"-*
 	
-	cd "${BASE_DIR}" && env STD_CLANG_ARGS='${c_flags}' STD_KERNEL_PATH='${CURDIR}' STD_CLANG_FILES='${KERNEL_INCLUDE}' "${CARGO}" rustc $(if ${RELEASE},--release) $(if ${V},--verbose) ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS}
+	cd "${BASE_DIR}" && env RUST_TARGET_PATH='${BASE_DIR}' STD_CLANG_ARGS='${c_flags}' STD_KERNEL_PATH='${CURDIR}' STD_CLANG_FILES='${KERNEL_INCLUDE}' "${CARGO}" rustc $(if ${RELEASE},--release) $(if ${V},--verbose) ${CARGOFLAGS} --target="${UTS_MACHINE}-unknown-none-gnu" -- ${RCFLAGS}
 	cp "${CARGO_MOD_DIR}/${rust-target}" $(obj)
 	
 	# Write build parameters to file (for rebuilding linux-std if different kernel headers are used)

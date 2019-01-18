@@ -1,8 +1,9 @@
+use std::env;
 use std::io::Write;
+use std::path::Path;
 
 extern crate bindgen;
 extern crate shlex;
-
 
 /// Path to the kernel bindings source file to generate
 const FILEPATH_CODE:   &'static str = "src/os/kernel.rs";
@@ -19,28 +20,21 @@ const CLANG_HEADER_REQUIRED: [&'static str; 3] = [
 
 /// List of parameters not ever to pass to the clang parser of rust-bindgen
 const CLANG_ARGS_BLACKLIST: [&'static str; 10] = [
-	"-mno-80387", "-mno-fp-ret-in-387", "-mskip-rax-setup", "-maccumulate-outgoing-args",
-	"-mpreferred-stack-boundary=3", "-mfentry",
-	"-fno-var-tracking-assignments", "-fconserve-stack", "-DCC_HAVE_ASM_GOTO",
-	"-fno-delete-null-pointer-checks"
+    "-mno-fp-ret-in-387",
+    "-mpreferred-stack-boundary=3",
+    "-mskip-rax-setup",
+    "-mindirect-branch=thunk-extern",
+    "-mindirect-branch-register",
+    "-fno-var-tracking-assignments",
+    "-mrecord-mcount",
+    "-fconserve-stack",
+    "-fmacro-prefix-map=./=",
+    "-DCC_HAVE_ASM_GOTO",
 ];
-
-
-/// Logging printer for output from rust-bindgen
-struct Logger;
-impl bindgen::Logger for Logger {
-	fn error(&self, msg: &str) {
-		writeln!(&mut std::io::stderr(), "error: {}", msg).unwrap();
-	}
-	
-	fn warn(&self, msg: &str) {
-		writeln!(&mut std::io::stderr(), "warning: {}", msg).unwrap();
-	}
-}
 
 fn main() {
 	// Read and parse required environment variables
-	let clang_args = match std::env::var("STD_CLANG_ARGS") {
+	let mut clang_args: Vec<String> = match env::var("STD_CLANG_ARGS") {
 		Ok(string) =>
 			match shlex::split(string.as_str()) {
 				Some(mut args) => {
@@ -67,7 +61,7 @@ fn main() {
 			panic!("Missing environment variable STD_CLANG_ARGS: {:?}", error);
 		}
 	};
-	let clang_files = match std::env::var("STD_CLANG_FILES") {
+	let clang_files = match env::var("STD_CLANG_FILES") {
 		Ok(string) =>
 			match shlex::split(string.as_str()) {
 				Some(args) => args,
@@ -79,42 +73,27 @@ fn main() {
 			panic!("Missing environment variable STD_CLANG_FILES: {:?}", error);
 		}
 	};
-	let kernel_path = match std::env::var("STD_KERNEL_PATH") {
+	let kernel_path = match env::var("STD_KERNEL_PATH") {
 		Ok(string) => string,
 		Err(error) => {
 			panic!("Missing environment variable STD_KERNEL_PATH: {:?}", error);
 		}
 	};
-	let out_dir = match std::env::var("OUT_DIR") {
+	let out_dir = match env::var("OUT_DIR") {
 		Ok(string) => string,
 		Err(error) => {
 			panic!("Missing environment variable OUT_DIR: {:?}", error);
 		}
 	};
 	
-	
-	
 	let filepath_header = format!("{}/{}", out_dir, FILENAME_HEADER);
-	
-	// Assemble parsing options
-	let mut options = bindgen::BindgenOptions {
-		builtins:     true,
-		// We need the original `clang_args` for writing the build parameters later on
-		clang_args:   clang_args.clone(),
-		derive_debug: false,
-		emit_ast:     false,
-		.. Default::default()
-	};
-	
+
 	// Prevent the kernel from declaring datatypes that are rust internal datatypes
-	options.clang_args.push(String::from("-Dfalse=__false"));
-	options.clang_args.push(String::from("-Dtrue=__true"));
-	options.clang_args.push(String::from("-Du64=__u64"));
+	clang_args.push(String::from("-Dfalse=__false"));
+	clang_args.push(String::from("-Dtrue=__true"));
+	clang_args.push(String::from("-Du64=__u64"));
 	
-	// Tell clang to process the generated header file
-	options.clang_args.push(filepath_header.clone());
-	
-	// Push supplied header file paths (relative to the kernel directory)
+    // Push supplied header file paths (relative to the kernel directory)
 	match std::fs::File::create(filepath_header.clone()) {
 		Ok(mut file) => {
 			// Generate include lines for all requested headers
@@ -132,36 +111,29 @@ fn main() {
 		}
 	}
 	
-	
-	
-	{
-		// Open output file
-		let mut file = match std::fs::File::create(FILEPATH_CODE) {
-			Ok(file)   => file,
-			Err(error) => {
-				panic!("Failed to open file \"{}\": {}", FILEPATH_CODE, error);
-			}
-		};
-		
-		let build_path  = std::env::current_dir().unwrap().as_path().to_owned();
-		let kernel_path = std::path::Path::new(kernel_path.as_str());
-		assert!(std::env::set_current_dir(&kernel_path).is_ok());
-		
-		// Debugging information (displayed in case of problems)
-		println!("Working directory: {}", std::env::current_dir().unwrap().to_str().unwrap());
-		println!("LLVM arguments:    {}", options.clang_args.join(" "));
-		
-		let logger = Logger {};
-		match bindgen::Bindings::generate(&options, Some(&logger), None) {
-			Ok(result) => {
-				file.write_all(result.to_string().as_bytes()).unwrap();
-			},
-			_ => {
-				// Logger hopefully has already printed all relevant information
-				panic!("Error generating bindings!");
-			}
-		}
-		
-		assert!(std::env::set_current_dir(&build_path).is_ok());
-	};
+	// Tell clang to process the generated header file
+	clang_args.push(filepath_header);
+
+    // Open the output file before changing directory.
+    let output = std::fs::File::create(FILEPATH_CODE)
+        .unwrap_or_else(|e| panic!("Failed to create file {:?}: {}", FILEPATH_CODE, e));
+
+    let build_path = env::current_dir().unwrap().as_path().to_owned();
+    env::set_current_dir(&Path::new(&kernel_path)).unwrap();
+
+    bindgen::builder()
+        .emit_builtins()
+        .clang_args(clang_args)
+        .derive_debug(false)
+        .opaque_type("timex") // large types with bitfields are broken; see rust-bindgen#1325
+        .rustfmt_bindings(true)
+        .generate()
+        .unwrap()
+        .write(Box::new(output))
+        .unwrap();
+
+    // Don't re-run this thing, ever. It takes too long. Do a clean rebuild if the kernel changes.
+    println!("cargo:rerun-if-changed=build.rs");
+
+    env::set_current_dir(&build_path).unwrap();
 }

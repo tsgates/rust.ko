@@ -48,10 +48,7 @@ pub type c_float  = f32;
 pub type c_double = f64;
 
 // The special "size" type
-#[cfg(target_pointer_width = "32")]
-pub type c_size_t = u32;
-#[cfg(target_pointer_width = "64")]
-pub type c_size_t = u64;
+pub type c_size_t = usize;
 
 /// Magic pointer that represents a `void*` in C
 /// See `libstd/os/raw.rs:48` from the Rust source code for details…

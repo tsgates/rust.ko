@@ -14,7 +14,7 @@ export RUST_FILES        := $(wildcard src/*.rs)
 export RUST_ROOT         := /usr
 
 # Rust compiler settings
-export CARGO      = $(RUST_ROOT)/bin/cargo
+export CARGO      = $(RUST_ROOT)/bin/xargo
 export CARGOFLAGS =
 export RCFLAGS    =
 export RELEASE    =
