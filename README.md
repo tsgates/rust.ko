@@ -13,7 +13,7 @@ to compile it.
 ## TL;DR
 
 1. Create a file `config.mk` in the root directory of the repository.
-2. Set `RUST_ROOT` in this file to the directory containing `bin/rustc`, e.g. `RUST_ROOT := /usr`
+2. Set `RUST_ROOT` in this [Makefile](Makefile) to the directory containing `bin/rustc`, e.g. `RUST_ROOT := /usr`
 3. Compile `rust.ko`:
 
         $ make
