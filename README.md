@@ -6,6 +6,7 @@ a minimal Linux kernel module written in rust.
 
  - A recent build of Rust (latest nightly)
  - Xargo (install with `cargo install xargo`)
+ - Rust source code (install with `rustup component add rust-src`)
 
 This code uses [feature flags](http://blog.rust-lang.org/2014/10/30/Stability.html#the-plan), so
 you'll need to use a [nightly version of Rust](http://doc.rust-lang.org/book/nightly-rust.html)
